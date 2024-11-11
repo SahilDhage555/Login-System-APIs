@@ -1,14 +1,18 @@
+// Import essential modules
 const express = require("express");
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs"); // Hash passwords
+const jwt = require("jsonwebtoken"); // Generate tokens
 const cors = require("cors");
-const User = require("./Database/Users");
+const User = require("./Database/Users"); // User model
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:3000' }));
-app.use(express.json());
 
+// Enable CORS for the frontend running on localhost:3000
+app.use(cors());
+app.use(express.json()); // Parse JSON requests
+
+// Connect to MongoDB database
 mongoose.connect("mongodb://localhost:27017/loginSystem", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -17,12 +21,20 @@ mongoose.connect("mongodb://localhost:27017/loginSystem", {
 // Registration Route
 app.post("/new-user", async (req, res) => {
   const { name, dateOfBirth, email, password } = req.body;
+
+  // Hash the password before saving
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({ name, dateOfBirth, email, password: hashedPassword, normalPassword: password });
+  const user = new User({
+    name,
+    dateOfBirth,
+    email,
+    password: hashedPassword,
+    normalPassword: password,
+  });
 
   try {
-    await user.save();
-    const token = jwt.sign({ email: user.email }, "LoginSystem");
+    await user.save(); // Save user to database
+    const token = jwt.sign({ email: user.email }, "LoginSystem"); // Generate JWT token
     res.json({ token, user });
   } catch (error) {
     res.status(400).json({ error: "User already exists" });
@@ -33,6 +45,8 @@ app.post("/new-user", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
+
+  // Check password match and generate token
   if (user && (await bcrypt.compare(password, user.password))) {
     const token = jwt.sign({ email: user.email }, "LoginSystem");
     res.json({ token, user });
@@ -41,15 +55,16 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Route to fetch user data
+// Route to fetch users with selected fields for display
 app.get("/users", async (req, res) => {
-    try {
-      const users = await User.find({}, 'name dateOfBirth email normalPassword'); // Explicitly include the password field
-      res.json(users);
-    } catch (error) {
-      res.status(500).json({ message: "Server error: unable to fetch users" });
-    }
-  });
+  try {
+    const users = await User.find({}, "name dateOfBirth email normalPassword"); // Include necessary fields
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Server error: unable to fetch users" });
+  }
+});
 
+// Start server on port 3032
 app.listen(3032);
 console.log("Server running on port no. 3032");
