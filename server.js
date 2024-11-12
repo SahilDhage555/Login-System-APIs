@@ -9,7 +9,7 @@ const User = require("./Database/Users"); // User model
 const app = express();
 
 // Enable CORS for the frontend running on localhost:3000
-app.use(cors());
+app.use(cors({ origin: 'https://login-stm.vercel.app/login' }));
 app.use(express.json()); // Parse JSON requests
 
 // Connect to MongoDB database
