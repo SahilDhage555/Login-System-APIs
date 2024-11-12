@@ -13,7 +13,7 @@ app.use(cors({ origin: 'https://login-stm.vercel.app/login' }));
 app.use(express.json()); // Parse JSON requests
 
 // Connect to MongoDB database
-mongoose.connect("mongodb://localhost:27017/loginSystem", {
+mongoose.connect(process.env.DATABASE_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
