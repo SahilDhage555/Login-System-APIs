@@ -1,3 +1,4 @@
+require("dotenv").config();
 // Import essential modules
 const express = require("express");
 const mongoose = require("mongoose");
@@ -9,14 +10,17 @@ const User = require("./Database/Users"); // User model
 const app = express();
 
 // Enable CORS for the frontend running on localhost:3000
-app.use(cors({ origin: 'https://login-stm.vercel.app/login' }));
+app.use(
+  cors({
+    origin: ["https://login-stm.vercel.app"],
+    methods: ["POST", "GET"],
+    credentials: true,  
+  })
+);
 app.use(express.json()); // Parse JSON requests
 
 // Connect to MongoDB database
-mongoose.connect(process.env.DATABASE_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect('mongodb+srv://sahildhage555:sahil555@cluster0.2xjo4hm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
 
 // Registration Route
 app.post("/new-user", async (req, res) => {
