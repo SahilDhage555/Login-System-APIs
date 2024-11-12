@@ -12,16 +12,15 @@ const app = express();
 // Enable CORS for the frontend running on localhost:3000
 app.use(
   cors({
-    origin: ["https://login-stm.vercel.app"],
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
     methods: ["POST", "GET"],
-    credentials: true,  
+    credentials: true,
   })
 );
 app.use(express.json()); // Parse JSON requests
 
 // Connect to MongoDB database
-mongoose.connect('mongodb+srv://sahildhage555:sahil555@cluster0.2xjo4hm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
-
+mongoose.connect(process.env.MONGODB_URI);
 // Registration Route
 app.post("/new-user", async (req, res) => {
   const { name, dateOfBirth, email, password } = req.body;
@@ -38,7 +37,7 @@ app.post("/new-user", async (req, res) => {
 
   try {
     await user.save(); // Save user to database
-    const token = jwt.sign({ email: user.email }, "LoginSystem"); // Generate JWT token
+    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET); // Generate JWT token
     res.json({ token, user });
   } catch (error) {
     res.status(400).json({ error: "User already exists" });
